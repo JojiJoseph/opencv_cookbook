@@ -30,11 +30,15 @@ def ransac_circle(x, y, iter=1000, eps=0.5):
     return best_x0, best_y0, best_r
 
 
-cv2.namedWindow("RANSAC Circle")
+cv2.namedWindow("Circle")
 
 drawing = np.zeros((600, 800, 3))
 
+
+use_backscreen = True
+
 cv2.putText(drawing,"Please draw some circles", (100,50), cv2.FONT_HERSHEY_SIMPLEX, 1, (255,255,255))
+drawing_backscreen = drawing.copy()
 
 pre_x, pre_y = 0, 0
 is_mouse_down = False
@@ -60,7 +64,11 @@ def mouse_callback(event, x, y, flags, param):
         if x_arr and len(x_arr) > 3:
             color = colors[np.random.randint(len(colors))]
             x0, y0, r = ransac_circle(np.array(x_arr), np.array(y_arr), eps=20)
-            cv2.circle(drawing, (int(x0),int(y0)), int(r), color=color, thickness=2)
+            if use_backscreen:
+                cv2.circle(drawing_backscreen, (int(x0),int(y0)), int(r), color=(255,255,255), thickness=2)
+                drawing = drawing_backscreen.copy()
+            else:
+                cv2.circle(drawing, (int(x0),int(y0)), int(r), color=color, thickness=2)
             x_arr = []
             y_arr = []
 
@@ -71,9 +79,9 @@ def mouse_callback(event, x, y, flags, param):
             y_arr.append(y)
             pre_x, pre_y = x, y
 
-cv2.setMouseCallback("RANSAC Circle", mouse_callback)
+cv2.setMouseCallback("Circle", mouse_callback)
 
 while True:
-    cv2.imshow("RANSAC Circle", drawing)
+    cv2.imshow("Circle", drawing)
     if cv2.waitKey(1) & 0xFF == ord('q'):
         break
