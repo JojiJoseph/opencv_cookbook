@@ -1,7 +1,7 @@
 import cv2
 import numpy as np
 
-cv2.samples.addSamplesDataSearchPath("test_images")
+cv2.samples.addSamplesDataSearchPath("../test_images")
 
 img = cv2.imread(cv2.samples.findFile("building.jpg"))
 
