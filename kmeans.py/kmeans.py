@@ -2,11 +2,6 @@ import cv2
 import numpy as np
 import matplotlib.pyplot as plt
 
-cv2.samples.addSamplesDataSearchPath("../test_images")
-
-img = cv2.imread(cv2.samples.findFile("baboon.jpg"))
-
-Z = img.reshape((-1,3)).astype(np.float32)
 
 Z1 = np.random.normal(0,1, (100,2))
 
