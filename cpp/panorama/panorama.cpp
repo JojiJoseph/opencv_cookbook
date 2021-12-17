@@ -1,5 +1,3 @@
-// import cv2
-// import numpy as np
 #include <opencv2/opencv.hpp>
 #include <iostream>
 
