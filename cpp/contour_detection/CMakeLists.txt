@@ -1,0 +1,6 @@
+cmake_minimum_required(VERSION 2.8)
+project( ContourDetection )
+find_package( OpenCV REQUIRED )
+include_directories( ${OpenCV_INCLUDE_DIRS} )
+add_executable( ContourDetection.o ContourDetection.cpp )
+target_link_libraries( ContourDetection.o ${OpenCV_LIBS} )
