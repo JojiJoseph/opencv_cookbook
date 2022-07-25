@@ -2,7 +2,12 @@ import time
 import numpy as np
 import cv2
 
-def ransac_line(x, y, iter=1000, eps=0.5):
+window_name = "Draw some lines"
+
+draw_dots = True
+apply_on_acc = True
+
+def ransac_line(x, y, iter=10000, eps=5):
     best_x0, best_y0, best_vx, best_vy = 0, 0, 1, 1
     best_n_out = np.inf
     start = time.time()
@@ -14,7 +19,7 @@ def ransac_line(x, y, iter=1000, eps=0.5):
         xb, yb = x[idx2], y[idx2]
         n_out = 0
         norm = np.linalg.norm([xb-xa,yb-ya])
-        n_out = np.sum( np.cross([xb-xa,yb-ya], np.vstack([x-xa, y-ya]).T )> eps * norm )
+        n_out = np.sum( np.abs(np.cross([xb-xa,yb-ya], np.vstack([x-xa, y-ya]).T) )> eps * norm )
         if n_out < best_n_out:
             best_n_out = n_out
             best_x0, best_y0 = xa, ya
@@ -24,14 +29,14 @@ def ransac_line(x, y, iter=1000, eps=0.5):
     return best_vx, best_vy, best_x0, best_y0
 
 
-cv2.namedWindow("Line")
+cv2.namedWindow(window_name)
 
 drawing = np.zeros((600, 800, 3),dtype=np.uint8)
 
 
 use_backscreen = False
 
-cv2.putText(drawing,"Please draw some lines", (100,50), cv2.FONT_HERSHEY_SIMPLEX, 1, (255,255,255))
+# cv2.putText(drawing,"Please draw some lines", (100,50), cv2.FONT_HERSHEY_SIMPLEX, 1, (255,255,255))
 drawing_backscreen = drawing.copy()
 
 pre_x, pre_y = 0, 0
@@ -48,6 +53,8 @@ colors = [
     (255,0,255)
 ]
 
+canvas_data = drawing.copy()
+
 def mouse_callback(event, x, y, flags, param):
     global drawing, pre_x, pre_y, is_mouse_down, x_arr, y_arr
     if event == cv2.EVENT_LBUTTONDOWN:
@@ -57,27 +64,44 @@ def mouse_callback(event, x, y, flags, param):
         is_mouse_down = False
         if x_arr and len(x_arr) > 2:
             color = colors[np.random.randint(len(colors))]
-            vx,vy,x0,y0 = ransac_line(np.array(x_arr), np.array(y_arr), eps=20)
+            vx,vy,x0,y0 = ransac_line(np.array(x_arr), np.array(y_arr), eps=5)
+            print("Line model (vx, vy, x0, y0)", vx, vy, x0, y0)
             if use_backscreen:
                 # cv2.circle(drawing_backscreen, (int(x0),int(y0)), int(r), color=(255,255,255), thickness=2)
                 cv2.line(drawing_backscreen, np.int0([x0,y0]), np.int0([x0+vx*100,y0+vy*100]),(255,255,255),thickness=2)
                 drawing = drawing_backscreen.copy()
             else:
+                if apply_on_acc:
+                    drawing = canvas_data.copy()
                 # cv2.circle(drawing, (int(x0),int(y0)), int(r), color=color, thickness=2)
                 cv2.line(drawing, np.int0([0,y0-x0/vx*vy]), np.int0([x0+vx*(800-x0)/vx,y0+vy*(800-x0)/vx]),color,thickness=2)
-            x_arr = []
-            y_arr = []
+                cv2.circle(drawing, (x0,y0), 10, (0,0,255), 4)
+            if use_backscreen or not apply_on_acc:
+                x_arr = []
+                y_arr = []
+            if apply_on_acc:
+                temp = cv2.cvtColor(canvas_data,cv2.COLOR_BGR2GRAY)
+                # cv2.imshow("temp", temp)
+                _,temp = cv2.threshold(temp, 128, 255, cv2.THRESH_BINARY)
+                xy = cv2.findNonZero(temp).squeeze()
+                # print("xy shape", xy.shape)
+                x_arr = xy[:,0].tolist()
+                y_arr = xy[:,1].tolist()
 
     elif event == cv2.EVENT_MOUSEMOVE:
         if is_mouse_down:
-            cv2.line(drawing, (pre_x,pre_y), (x,y), (255,255,255))
+            if draw_dots:
+                cv2.circle(drawing, (x,y), 1, (255,255,255), -1)
+                cv2.circle(canvas_data, (x,y), 1, (255,255,255), -1)
+            else:
+                cv2.line(canvas_data, (pre_x,pre_y), (x,y), (255,255,255))
             x_arr.append(x)
             y_arr.append(y)
             pre_x, pre_y = x, y
 
-cv2.setMouseCallback("Line", mouse_callback)
+cv2.setMouseCallback(window_name, mouse_callback)
 
 while True:
-    cv2.imshow("Line", drawing)
+    cv2.imshow(window_name, drawing)
     if cv2.waitKey(1) & 0xFF == ord('q'):
         break
