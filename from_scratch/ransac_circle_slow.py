@@ -22,11 +22,9 @@ def ransac_circle(x, y, iter=1000, eps=0.5):
             continue
         n_out = 0
         r = np.sqrt((xa-x0)**2 + (ya-y0)**2)
-        # for i in range(len(x)):
-        #     if not (r - eps < np.sqrt((x[i]-x0)**2 + (y[i]-y0)**2) < eps + r):
-        #         n_out += 1
-        n_out = np.sum((r- np.sqrt((x-x0)**2 + (y-y0)**2))**2 > eps)
-        # n_out = np.sum(1 - (r - eps < np.sqrt((x-x0)**2 + (y-y0)**2) < eps + r))
+        for i in range(len(x)):
+            if not (r - eps < np.sqrt((x[i]-x0)**2 + (y[i]-y0)**2) < eps + r):
+                n_out += 1
         if n_out < best_n_out:
             best_n_out = n_out
             best_x0, best_y0 = x0, y0
@@ -81,8 +79,6 @@ def mouse_callback(event, x, y, flags, param):
     elif event == cv2.EVENT_MOUSEMOVE:
         if is_mouse_down:
             cv2.circle(drawing, (x, y), 1, (255, 255, 255), -1)
-            # cv2.circle(canvas_data, (x, y), 1, (255, 255, 255), -1)
-            # cv2.line(drawing, (pre_x,pre_y), (x,y), (255,255,255))
             x_arr.append(x)
             y_arr.append(y)
             pre_x, pre_y = x, y
