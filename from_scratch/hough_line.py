@@ -17,7 +17,7 @@ def hough_line(x: List, y: List):
     theta_max = a % 360
     print(r_max, theta_max)
     img = hist/hist.max()
-    cv2.circle(img, (theta_max, r_max), 4, (255,255,255), thickness=2)
+    cv2.circle(img, (theta_max, r_max), 6, (1,1,1), thickness=1)
     # cv2.imshow("Hough",img )
     return r_max, math.radians(theta_max), img
 
@@ -59,18 +59,11 @@ if __name__ == "__main__":
             is_mouse_down = False
             if x_arr and len(x_arr) > 2:
                 color = colors[np.random.randint(len(colors))]
-                # vx, vy, x0, y0 = ransac_line(
-                #     np.array(x_arr), np.array(y_arr), eps=5)
             
                 r, theta, hist = hough_line(x_arr, y_arr)
-                # cv2.imshow("Hough Histogram", hist)
-                # cv2.waitKey(1)
                 y0 = (1/-math.tan(theta))*0 + r/math.sin(theta)
                 y400 = (1/-math.tan(theta))*400 + r/math.sin(theta)
-                # print(y0, y400)
-                # print("Line model (vx, vy, x0, y0)", vx, vy, x0, y0)
                 if use_backscreen:
-                    # cv2.circle(drawing_backscreen, (int(x0),int(y0)), int(r), color=(255,255,255), thickness=2)
                     cv2.line(drawing_backscreen, np.int0([0, y0]), np.int0(
                         [400, y400]), (255, 255, 255), thickness=2)
                     drawing = drawing_backscreen.copy()
@@ -78,11 +71,7 @@ if __name__ == "__main__":
                     if apply_on_acc:
                         drawing = canvas_data.copy()
                     cv2.line(drawing, np.int0([0, y0]), np.int0(
-                        [400, y400]), (255, 255, 255), thickness=2)
-                    # cv2.circle(drawing, (int(x0),int(y0)), int(r), color=color, thickness=2)
-                    # cv2.line(drawing, np.int0(
-                    #     [0, y0-x0/vx*vy]), np.int0([x0+vx*(800-x0)/vx, y0+vy*(800-x0)/vx]), color, thickness=2)
-                    # cv2.circle(drawing, (x0, y0), 10, (0, 0, 255), 4)
+                        [400, y400]), color, thickness=2)
                 if use_backscreen or not apply_on_acc:
                     x_arr = []
                     y_arr = []
@@ -114,9 +103,10 @@ if __name__ == "__main__":
     while True:
         cv2.imshow(window_name, drawing)
         if hist is not None:
-            cv2.imshow("Histogram", hist)
+            cv2.imshow("Histogram",(500*hist).astype(np.uint8))
         key = cv2.waitKey(1) & 0xFF
         if key == ord('q'):
             break
         if key == ord('s'):
             cv2.imwrite("output.png", drawing)
+            cv2.imwrite("histogram.png", (500*hist).astype(np.uint8))
