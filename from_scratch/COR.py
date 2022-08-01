@@ -7,6 +7,7 @@ import time
 from typing import *
 import numpy as np
 import cv2
+import math
 
 
 if __name__ == "__main__":
@@ -52,7 +53,16 @@ if __name__ == "__main__":
             for (pre_x, x),(pre_y, y) in zip(x_arr, y_arr):
                 # cv2.circle(drawing, (x, y), 1, (255, 255, 255), -1)
                 # cv2.arrowedLine(drawing)
-                cv2.arrowedLine(drawing_backscreen, (pre_x, pre_y), (x,y), (255, 255, 255))
+                cv2.arrowedLine(drawing_backscreen, (pre_x, pre_y), (x,y), (255, 255, 255), thickness=2)
+                normal_slop = -(x-pre_x)/(y-pre_y)
+                normal_dx = 1
+                normal_dy = normal_slop * normal_dx
+                normal_dx, normal_dy = normal_dx/math.sqrt(normal_dx**2 + normal_dy**2),normal_dy/math.sqrt(normal_dx**2 + normal_dy**2)
+                x_m = (x+pre_x)//2
+                y_m = (y+pre_y)//2
+                cv2.arrowedLine(drawing_backscreen, (x_m, y_m), (x_m + int(400*normal_dx), y_m + int(400*normal_dy)), (0,255,255), thickness=1)
+                cv2.arrowedLine(drawing_backscreen, (x_m, y_m), (x_m - int(400*normal_dx), y_m - int(400*normal_dy)), (0,255,255), thickness=1)
+
             if len(x_arr) >= 2:
                 color = colors[np.random.randint(len(colors))]
                 X = np.array(x_arr)
