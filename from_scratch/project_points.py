@@ -64,11 +64,11 @@ while True:
     cv2.putText(img_left, "OpenCV project points", (20,20), cv2.FONT_HERSHEY_COMPLEX, 0.5, (0,255,255))
 
     # Custom project points
-    # R = rvec_to_R(rvec)
-    # rvec = R_to_rvec(R) # Fix this
+    R = rvec_to_R(rvec)
+    rvec = R_to_rvec(R)
     img_points = project_points(points.reshape(-1,3), rvec, tvec,camera_matrix)
     img_points = img_points.astype(int)
-    # print(img_points.shape)
+
     cv2.polylines(img_right, [img_points], True, (255,0,0), 2)
     cv2.putText(img_right, "Custom project points", (20,20), cv2.FONT_HERSHEY_COMPLEX, 0.5, (0,255,255))
     img = np.concatenate([img_left, img_right], axis=1)
