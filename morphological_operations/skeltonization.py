@@ -16,8 +16,10 @@ kernel = cv2.getStructuringElement(cv2.MORPH_CROSS, (3,3))
 iteration = 0
 while True:
     img_eroded = cv2.erode(img, kernel)
-    img_dilated = cv2.dilate(img_eroded, kernel)
-    delta = cv2.subtract(img, img_dilated)
+    # img_dilated = cv2.dilate(img_eroded, kernel)
+    # delta = cv2.subtract(img, img_dilated)
+    img_open = cv2.morphologyEx(img_eroded, cv2.MORPH_OPEN, kernel)
+    delta = cv2.subtract(img_eroded, img_open)
     skelton = cv2.bitwise_or(skelton, delta)
     img = img_eroded
     iteration += 1
