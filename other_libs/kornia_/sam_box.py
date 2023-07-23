@@ -27,7 +27,7 @@ img = K.utils.tensor_to_image(img_tensor)
 img = np.clip(img*255, 0, 255).astype(np.uint8)
 
 
-r = cv2.selectROI("Select a bounding box", img)
+r = cv2.selectROI("Select a bounding box", img[...,::-1])
 
 
 # Setting up a SamConfig with the model type and checkpoint desired
@@ -48,10 +48,13 @@ mask = (mask.cpu().numpy()*255).astype(np.uint8)
 mask = mask[...,None] & [255,0,0]
 mask = mask.astype(np.uint8)
 print(img.shape, mask.shape, mask.dtype)
-mask = cv2.resize(mask, (640,640))
-mask = mask[:480]
+mask = cv2.resize(mask, (max(img.shape), max(img.shape)))
+if img.shape[0] < img.shape[1]:
+    mask = mask[:img.shape[0]]
+else:
+    mask = mask[:,:img.shape[1]]
 img_out = cv2.addWeighted(img, 0.5, mask, 0.5,1)
-cv2.imshow("mask", mask)
-cv2.imshow("img_out", img_out)
+cv2.imshow("mask", mask[...,::-1])
+cv2.imshow("img_out", img_out[...,::-1])
 
 cv2.waitKey()
